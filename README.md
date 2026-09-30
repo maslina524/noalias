@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/noalias.svg)](https://crates.io/crates/noalias)
 [![docs.rs](https://docs.rs/noalias/badge.svg)](https://docs.rs/noalias)
 [![license](https://img.shields.io/crates/l/noalias.svg)](https://crates.io/crates/noalias)
-[![no_std](https://img.shields.io/badge/no_std-supported-blue.svg)](https://docs.rs/noalias)
+[![no_std](https://img.shields.io/badge/no__std-supported-blue.svg)](https://docs.rs/noalias)
 
 Macro crate for auto-generating type-safe wrappers fo types
 

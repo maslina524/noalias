@@ -14,7 +14,7 @@
 )]
 #![allow(clippy::cargo_common_metadata)]
 
-macro_rules! noalias_impl {
+macro_rules! __noalias_impl {
     ($name:ident = $typ:ty) => {
         impl $name {
             pub fn new(value: $typ) -> Self {
@@ -44,15 +44,25 @@ macro_rules! noalias_impl {
 
 #[macro_export]
 macro_rules! noalias {
-    ($(#[$attr:meta])* pub type $name:ident = $typ:ty) => {
-        $(#[$attr])*
-        pub struct $name($typ);
-        noalias_impl!($name = $typ)
+    ($(
+        $(#[$attr:meta])* pub type $name:ident = $typ:ty;
+     )*) => {
+        $(
+            $(#[$attr])*
+            pub struct $name($typ);
+            __noalias_impl!($name = $typ);
+        
+        )*
     };
-    ($(#[$attr:meta])* type $name:ident = $typ:ty) => {
-        $(#[$attr])*
-        struct $name($typ);
-        noalias_impl!($name = $typ)
+    ($(
+        $(#[$attr:meta])* type $name:ident = $typ:ty;
+     )*) => {
+        $(
+            $(#[$attr])*
+            pub struct $name($typ);
+            __noalias_impl!($name = $typ);
+        
+        )*
     };
 }
 
@@ -60,10 +70,28 @@ macro_rules! noalias {
 mod tests {
     #[test]
     fn cchar_test() {
-        noalias!(pub type CChar = i8);
-        let cchar = CChar(10);
+        noalias!(pub type CChar = i8;);
+        let cchar = CChar::new(10);
 
         let struc = format!("{cchar}");
         assert_eq!(struc, 10.to_string());
+    }
+
+    #[test]
+    fn multi_init_test() {
+        use core::any::TypeId;
+        fn same_type<T: 'static, U: 'static>() -> bool {
+            TypeId::of::<T>() == TypeId::of::<U>()
+        }
+
+        noalias!(
+            pub type CChar = i8;
+            pub type CInt = i32;
+            pub type CShort = i16;
+        );
+
+        assert!(!same_type::<CChar, i8>());
+        assert!(!same_type::<CInt, i32>());
+        assert!(!same_type::<CShort, i16>());
     }
 }

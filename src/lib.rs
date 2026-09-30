@@ -1,17 +1,8 @@
+#![doc = include_str!("../README.md")]
+
 #![cfg_attr(not(test), no_std)]
 #![deny(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
 #![warn(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)]
-#![allow(
-    clippy::too_many_lines,
-    reason = "In logo/{a-z}.rs there are functions longer than 100 lines"
-)]
-#![allow(
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss,
-    reason = "There's no point in them, it will make the code cleaner"
-)]
 #![allow(clippy::cargo_common_metadata)]
 
 #[doc(hidden)]
@@ -102,6 +93,7 @@ macro_rules! __noalias_impl_trait {
     };
 }
 
+#[doc = include_str!("../doc/noalias.md")]
 #[macro_export]
 macro_rules! noalias {
     // --- WITH TRAITS ---
@@ -214,5 +206,24 @@ mod tests {
 
         let struc = CShort::new(42);
         assert_eq!(struc, 42);
+    }
+
+    #[test]
+    fn safe_transmute_test() {
+        noalias!(
+            #[derive(Clone)]
+            pub type CUInt = u32
+        );
+
+        let struc = CUInt::new(55);
+        let inner = struc.clone().into_inner();
+
+        // SAFETY: The structure is `#[repr(transparent)]`, 
+        // the wrapper bytes and the value are identical, transmute is safe.
+        let transmuted = unsafe { 
+            core::mem::transmute::<CUInt, u32>(struc) 
+        };
+
+        assert_eq!(inner, transmuted);
     }
 }

@@ -14,12 +14,8 @@
 )]
 #![allow(clippy::cargo_common_metadata)]
 
-#[macro_export]
-macro_rules! noalias {
-    ($(#[$attr:meta])* pub type $name:ident = $typ:ty) => {
-        $(#[$attr])*
-        pub struct $name($typ);
-
+macro_rules! noalias_impl {
+    ($name:ident = $typ:ty) => {
         impl $name {
             pub fn new(value: $typ) -> Self {
                 Self(value)
@@ -43,6 +39,20 @@ macro_rules! noalias {
                 core::fmt::Display::fmt(&self.0, f)
             }
         }
+    };
+}
+
+#[macro_export]
+macro_rules! noalias {
+    ($(#[$attr:meta])* pub type $name:ident = $typ:ty) => {
+        $(#[$attr])*
+        pub struct $name($typ);
+        noalias_impl!($name = $typ)
+    };
+    ($(#[$attr:meta])* type $name:ident = $typ:ty) => {
+        $(#[$attr])*
+        struct $name($typ);
+        noalias_impl!($name = $typ)
     };
 }
 
